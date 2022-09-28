@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "995693132815",
+    "project_id": "hima-ff1c8",
+    "storage_bucket": "hima-ff1c8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:995693132815:android:e33f7ada3c9febbfb7377a",
+        "android_client_info": {
+          "package_name": "fun.hackathon.hima"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "995693132815-rhlqjgurhlapbm18b12ehidb4dsahfsr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDN5Rdf55oKWbUO95v6P8yakIKMGnMf_XM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "995693132815-rhlqjgurhlapbm18b12ehidb4dsahfsr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
