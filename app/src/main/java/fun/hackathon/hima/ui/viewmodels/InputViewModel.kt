@@ -1,4 +1,4 @@
-package `fun`.hackathon.hima.ui.input
+package `fun`.hackathon.hima.ui.viewmodels
 
 import `fun`.hackathon.hima.data.model.PostDataModel
 import androidx.compose.runtime.mutableStateOf
