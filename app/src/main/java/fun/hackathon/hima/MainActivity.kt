@@ -1,5 +1,6 @@
 package `fun`.hackathon.hima
 
+import `fun`.hackathon.hima.ui.input.InputScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,7 +23,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    Greeting("Android")
+                    InputScreen()
                 }
             }
         }
