@@ -1,0 +1,22 @@
+name: Issue 作成時に Projects (Beta) に登録する ワークフロー
+on:
+  issues:
+    types: [opened]
+env:
+  PROJECT_OWNER: HackFunFes2022
+  PROJECT_NUMBER: 1
+  TARGET_LABEL: 'Project'
+  GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+jobs:
+  manage_project:
+    name: Projects (Beta) に登録する ジョブ
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add Issue to Project
+        id: add-issue-to-project
+        uses: monry/actions-add-issue-to-project@v1
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          project-owner: ${{ env.PROJECT_OWNER }}
+          project-number: ${{ env.PROJECT_NUMBER }}
+          issue-id: ${{ github.event.issue.node_id }}
