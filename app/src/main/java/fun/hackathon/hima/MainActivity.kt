@@ -1,5 +1,6 @@
 package `fun`.hackathon.hima
 
+
 import `fun`.hackathon.hima.ui.pages.DetailScreen
 import `fun`.hackathon.hima.ui.pages.InputScreen
 import `fun`.hackathon.hima.ui.pages.MainScreen
