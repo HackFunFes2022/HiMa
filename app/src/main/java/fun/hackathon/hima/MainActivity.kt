@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavHost(navController = navController, startDestination = NavItem.MainScreen.name) {
                         composable(NavItem.MainScreen.name) {
-                            InputScreen()
+                            MainScreen()
                         }
                         composable(NavItem.InputScreen.name) {
                             InputScreen()
