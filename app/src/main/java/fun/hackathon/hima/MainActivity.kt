@@ -18,14 +18,20 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import dagger.hilt.android.AndroidEntryPoint
 
 val LocalNavController = staticCompositionLocalOf<NavHostController> {
     error("No Current NavController")
 }
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val db = Firebase.firestore
+        FirebaseApp.initializeApp(this)
         setContent {
             HiMaTheme {
                 val navController = rememberNavController()
@@ -35,7 +41,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavHost(navController = navController, startDestination = NavItem.MainScreen.name) {
                         composable(NavItem.MainScreen.name) {
-                            MainScreen()
+                            InputScreen()
                         }
                         composable(NavItem.InputScreen.name) {
                             InputScreen()
