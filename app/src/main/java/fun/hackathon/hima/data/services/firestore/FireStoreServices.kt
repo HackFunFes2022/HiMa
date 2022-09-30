@@ -17,14 +17,12 @@ import dagger.hilt.android.components.ViewModelComponent
 import javax.inject.Inject
 
 class FireStoreService @Inject constructor():FireStoreInputScreenInterface {
-    override fun addPost(post:PostDataModel){
+    override fun addPost(post:PostDataModel): Boolean {
         if(post.title!=""&&post.geoPoint!=null){
-            Firebase.firestore.collection(CollectionNames.Posts.tag).add(post).addOnSuccessListener { documentReference ->
-                Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-            }.addOnFailureListener { e ->
-                Log.w(TAG, "Error adding document", e)
-            }
+            Firebase.firestore.collection(CollectionNames.Posts.tag)
+            return true
         }
+        return false
     }
     fun getCollection(): CollectionReference {
         return Firebase.firestore.collection(CollectionNames.Posts.tag)
@@ -32,7 +30,7 @@ class FireStoreService @Inject constructor():FireStoreInputScreenInterface {
 }
 
 interface  FireStoreInputScreenInterface{
-    fun addPost(post:PostDataModel)
+    fun addPost(post:PostDataModel): Boolean
 }
 
 interface  FireStoreMainScreenInterface{}
