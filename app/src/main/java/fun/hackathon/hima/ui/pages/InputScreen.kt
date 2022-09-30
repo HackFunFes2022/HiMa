@@ -1,6 +1,7 @@
 package `fun`.hackathon.hima.ui.pages
 
 
+import `fun`.hackathon.hima.LocalNavController
 import `fun`.hackathon.hima.ui.viewmodels.InputViewModel
 import android.location.LocationManager
 import android.location.LocationRequest
@@ -17,6 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
@@ -30,6 +32,7 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()){
     val model= viewModel.postModel
     val isChecked = rememberSaveable{ mutableStateOf(false) }
     viewModel.fetchLocation(LocalContext.current)
+    val navController = LocalNavController.current
     val currentLatLng=viewModel.latLngState.value
     val cameraPositionState = viewModel.positionState
     val inputLatLng:MutableState<LatLng?> = rememberSaveable() {
@@ -85,7 +88,10 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()){
                 else{
                     return@OutlinedButton
                 }
-                viewModel.addPost()
+                val flag=viewModel.addPost()
+                if(flag){
+                    navController.navigate(NavItem.MainScreen.name)
+                }
             }) {
                 Text(text = "Ok")
             }

@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -45,8 +46,8 @@ class InputViewModel @Inject constructor(
 //        }
 //    }
 
-    fun addPost() {
-        fireStoreService.addPost(post = postModel.value.copy(geoPoint = GeoPoint(0.0, 0.0)))
+    fun addPost(): Boolean {
+        return fireStoreService.addPost(post = postModel.value.copy(geoPoint = GeoPoint(0.0, 0.0)))
     }
     fun fetchLocation(context: Context){
         if (ActivityCompat.checkSelfPermission(
