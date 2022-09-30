@@ -30,7 +30,6 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()){
     val model= viewModel.postModel
     val isChecked = rememberSaveable{ mutableStateOf(false) }
     viewModel.fetchLocation(LocalContext.current)
-    val currentLatLng=viewModel.latLngState.value
     val cameraPositionState = viewModel.positionState
     val inputLatLng:MutableState<LatLng?> = rememberSaveable() {
         mutableStateOf(null)
@@ -56,7 +55,7 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()){
                 }
             ) {
                 Marker(
-                    state = MarkerState(position = currentLatLng),
+                    state = MarkerState(position = viewModel.latLngState.value),
                     title = "あなたの位置"
                 )
                 when{
@@ -76,7 +75,7 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()){
             }
             OutlinedButton(onClick = {
                 if(isChecked.value){
-                    viewModel.postModel.value=viewModel.postModel.value.copy(geoPoint = GeoPoint(currentLatLng.latitude,currentLatLng.longitude))
+                    viewModel.postModel.value=viewModel.postModel.value.copy(geoPoint = GeoPoint(viewModel.latLngState.value.latitude,viewModel.latLngState.value.longitude))
                 }
                 else if(inputLatLng.value!=null){
                     viewModel.postModel.value=viewModel.postModel.value.copy(geoPoint = GeoPoint(

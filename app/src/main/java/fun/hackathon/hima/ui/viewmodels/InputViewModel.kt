@@ -46,7 +46,7 @@ class InputViewModel @Inject constructor(
 //    }
 
     fun addPost() {
-        fireStoreService.addPost(post = postModel.value.copy(geoPoint = GeoPoint(0.0, 0.0)))
+        fireStoreService.addPost(post = postModel.value)
     }
     fun fetchLocation(context: Context){
         if (ActivityCompat.checkSelfPermission(

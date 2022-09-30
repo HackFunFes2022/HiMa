@@ -4,6 +4,8 @@ import `fun`.hackathon.hima.data.model.PostDataModel
 import `fun`.hackathon.hima.data.services.firestore.CollectionNames
 import android.content.ContentValues.TAG
 import android.util.Log
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -24,7 +26,9 @@ class FireStoreService @Inject constructor():FireStoreInputScreenInterface {
             }
         }
     }
-
+    fun getCollection(): CollectionReference {
+        return Firebase.firestore.collection(CollectionNames.Posts.tag)
+    }
 }
 
 interface  FireStoreInputScreenInterface{
