@@ -6,10 +6,7 @@ import android.location.LocationManager
 import android.location.LocationRequest
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,8 +30,11 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()){
     val model= viewModel.postModel
     val isChecked = rememberSaveable{ mutableStateOf(false) }
     viewModel.fetchLocation(LocalContext.current)
-    val latLng=viewModel.latLngState.value
+    val currentLatLng=viewModel.latLngState.value
     val cameraPositionState = viewModel.positionState
+    val inputLatLng:MutableState<LatLng?> = rememberSaveable() {
+        mutableStateOf(null)
+    }
 
     Scaffold(
         topBar = { TopAppBar(
@@ -50,12 +50,20 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()){
                 modifier= Modifier
                     .fillMaxWidth(0.9F)
                     .height(400.dp),
-                cameraPositionState = cameraPositionState
+                cameraPositionState = cameraPositionState,
+                onMapLongClick = {
+                    inputLatLng.value=it
+                }
             ) {
                 Marker(
-                    state = MarkerState(position = latLng),
+                    state = MarkerState(position = currentLatLng),
                     title = "あなたの位置"
                 )
+                when{
+                    inputLatLng.value!=null -> Marker(
+                        state = MarkerState(position = inputLatLng.value!!)
+                    )
+                }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "現在地で登録する")
@@ -63,18 +71,22 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()){
                     checked = isChecked.value,
                     onCheckedChange = {
                         isChecked.value = it
-                        if(it) {
-                            viewModel.postModel.value = viewModel.postModel.value.copy(
-                                geoPoint = GeoPoint(
-                                    latLng.latitude,
-                                    latLng.longitude
-                                )
-                            )
-                        }
                     }
                 )
             }
-            OutlinedButton(onClick = { viewModel.addPost() }) {
+            OutlinedButton(onClick = {
+                if(isChecked.value){
+                    viewModel.postModel.value=viewModel.postModel.value.copy(geoPoint = GeoPoint(currentLatLng.latitude,currentLatLng.longitude))
+                }
+                else if(inputLatLng.value!=null){
+                    viewModel.postModel.value=viewModel.postModel.value.copy(geoPoint = GeoPoint(
+                        inputLatLng.value!!.latitude,inputLatLng.value!!.longitude))
+                }
+                else{
+                    return@OutlinedButton
+                }
+                viewModel.addPost()
+            }) {
                 Text(text = "Ok")
             }
         }
