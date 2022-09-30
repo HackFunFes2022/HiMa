@@ -1,16 +1,17 @@
 package `fun`.hackathon.hima.ui.pages
 
-import `fun`.hackathon.hima.Greeting
 import `fun`.hackathon.hima.LocalNavController
 import `fun`.hackathon.hima.R
 import `fun`.hackathon.hima.data.model.PostDataModel
 import `fun`.hackathon.hima.ui.viewmodels.MainViewModel
+import `fun`.hackathon.hima.data.model.Params
+import android.Manifest
+import android.app.Activity
+import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
@@ -28,6 +29,8 @@ import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 @Composable
 fun MainScreen(viewModel:MainViewModel= hiltViewModel()) {
@@ -71,6 +74,7 @@ fun MainScreen(viewModel:MainViewModel= hiltViewModel()) {
             }
         }
     ) {
+
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState =cameraPositionState
@@ -83,5 +87,31 @@ fun MainScreen(viewModel:MainViewModel= hiltViewModel()) {
                 }
             }
         }
+        // MainContent()
+    }
+}
+
+@Composable
+fun MainContent() {
+    val context = LocalContext.current
+
+    if (ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED) {
+
+        GoogleMap(
+            modifier = Modifier.fillMaxSize()
+        ) {
+
+        }
+    } else {
+        // 許可ダイアログ出しといた方が良さそう
+        // 許可求める
+        ActivityCompat.requestPermissions(
+            context as Activity,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            Params.REQUEST_CODE_LOCATION
+        )
     }
 }
