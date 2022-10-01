@@ -29,9 +29,9 @@ interface FireStoreInputScreenInterface {
     fun addPost(post: PostDataModel): Boolean
 }
 
-interface FireStoreMainScreenInterface {}
+interface FireStoreMainScreenInterface
 
-interface FireStoreDetailScreenInterface {}
+interface FireStoreDetailScreenInterface
 
 
 @Module

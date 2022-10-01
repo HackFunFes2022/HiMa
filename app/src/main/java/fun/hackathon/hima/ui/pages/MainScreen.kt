@@ -38,12 +38,12 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val Hakodate = LatLng(41.7687, 140.7288)
     val cameraPosition = CameraPosition.fromLatLngZoom(Hakodate, 10f)
     val cameraPositionState = CameraPositionState(cameraPosition)
-    viewModel.collection.addSnapshotListener() { snapshot, e ->
+    viewModel.collection.addSnapshotListener { snapshot, e ->
         if (snapshot == null) {
             return@addSnapshotListener
         }
         val list = mutableListOf<PostDataModel>()
-        for (dc in snapshot!!.documents) {
+        for (dc in snapshot.documents) {
             val data = dc.data
             if (data != null) {
                 val post = PostDataModel.fromMap(data)
@@ -80,8 +80,8 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     post.geoPoint != null -> Marker(
                         state = MarkerState(
                             LatLng(
-                                post.geoPoint!!.latitude,
-                                post.geoPoint!!.longitude
+                                post.geoPoint.latitude,
+                                post.geoPoint.longitude
                             )
                         )
                     )
