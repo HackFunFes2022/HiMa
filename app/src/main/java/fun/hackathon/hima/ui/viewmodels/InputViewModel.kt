@@ -28,7 +28,7 @@ class InputViewModel @Inject constructor(
     val positionState = CameraPositionState()
 
     fun addPost(): Boolean {
-        return fireStoreService.addPost(post = postModel.value.copy(geoPoint = GeoPoint(0.0, 0.0)))
+        return fireStoreService.addPost(post = postModel.value)
     }
 
     fun updateGeoPoint(latLng: LatLng) {
