@@ -3,11 +3,10 @@ package `fun`.hackathon.hima.ui.pages
 
 import `fun`.hackathon.hima.LocalNavController
 import `fun`.hackathon.hima.ui.viewmodels.InputViewModel
-import android.location.LocationManager
-import android.location.LocationRequest
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,56 +14,69 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
 
 
 @Preview
 @Composable
-fun InputScreen(viewModel: InputViewModel = hiltViewModel()){
-    val model= viewModel.postModel
-    val isChecked = rememberSaveable{ mutableStateOf(false) }
-    viewModel.fetchLocation(LocalContext.current)
-    val navController = LocalNavController.current
-    val currentLatLng=viewModel.latLngState.value
-    val cameraPositionState = viewModel.positionState
-    val inputLatLng:MutableState<LatLng?> = rememberSaveable() {
-        mutableStateOf(null)
+fun InputScreen(viewModel: InputViewModel = hiltViewModel()) {
+    val model = viewModel.postModel
+    val isChecked = rememberSaveable { mutableStateOf(true) }
+    val context = LocalContext.current
+    if (viewModel.postModel.value.geoPoint == null) {
+        viewModel.fetchLocation(context)
     }
+    val navController = LocalNavController.current
+    val cameraPositionState = viewModel.positionState
 
     Scaffold(
-        topBar = { TopAppBar(
-            title = {Text(text = "ヒヤリ体験を入力")}
-        )}
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "ヒヤリ体験を入力") }
+            )
+        }
     ) {
-        Column(modifier = Modifier.fillMaxWidth(),horizontalAlignment = Alignment.CenterHorizontally) {
-            OutlinedTextField(modifier = Modifier.padding(20.dp),value = model.value.title, onValueChange = {model.value=model.value.copy(title = it)}, label = { Text(text = "タイトルは？")})
-            OutlinedTextField(modifier = Modifier.padding(20.dp),value = model.value.description, onValueChange = {model.value=model.value.copy(description = it)}, label = { Text(text = "どんなことにヒヤリとした？")})
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
+                modifier = Modifier.padding(20.dp),
+                value = model.value.title,
+                onValueChange = { model.value = model.value.copy(title = it) },
+                //titleの更新
+                label = { Text(text = "タイトルは？") })
+            OutlinedTextField(
+                modifier = Modifier.padding(20.dp),
+                value = model.value.description,
+                onValueChange = { model.value = model.value.copy(description = it) },
+                //descriptionの更新
+                label = { Text(text = "どんなことにヒヤリとした？") })
             //Button(onClick = {}, content = { Text(text = "地図を開く")})
-            //まだ使わないのでコメントアウトします！！！節約のため
             GoogleMap(
-                modifier= Modifier
+                modifier = Modifier
                     .fillMaxWidth(0.9F)
                     .height(400.dp),
                 cameraPositionState = cameraPositionState,
                 onMapLongClick = {
-                    inputLatLng.value=it
+                    if (!isChecked.value) {
+                        //現在地を利用しない場合
+                        //ロングタップでマーカーを移動
+                        viewModel.updateGeoPoint(it)
+                    }
                 }
             ) {
-                Marker(
-                    state = MarkerState(position = viewModel.latLngState.value),
-                    title = "あなたの位置"
-                )
-                when{
-                    inputLatLng.value!=null -> Marker(
-                        state = MarkerState(position = inputLatLng.value!!)
+                when {
+                    viewModel.postModel.value.geoPoint != null -> Marker(
+                        state = MarkerState(
+                            LatLng(
+                                viewModel.postModel.value.geoPoint!!.latitude,
+                                viewModel.postModel.value.geoPoint!!.longitude
+                            )
+                        )
                     )
                 }
             }
@@ -73,23 +85,18 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()){
                 Checkbox(
                     checked = isChecked.value,
                     onCheckedChange = {
+                        //チェックボックス
                         isChecked.value = it
+                        if (it) {
+                            viewModel.fetchLocation(context)//現在地にリセット
+                        }
                     }
                 )
             }
             OutlinedButton(onClick = {
-                if(isChecked.value){
-                    viewModel.postModel.value=viewModel.postModel.value.copy(geoPoint = GeoPoint(viewModel.latLngState.value.latitude,viewModel.latLngState.value.longitude))
-                }
-                else if(inputLatLng.value!=null){
-                    viewModel.postModel.value=viewModel.postModel.value.copy(geoPoint = GeoPoint(
-                        inputLatLng.value!!.latitude,inputLatLng.value!!.longitude))
-                }
-                else{
-                    return@OutlinedButton
-                }
-                val flag=viewModel.addPost()
-                if(flag){
+                val flag = viewModel.addPost()
+                if (flag) {
+                    //とりあえず仮置き
                     navController.navigate(NavItem.MainScreen.name)
                 }
             }) {

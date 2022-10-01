@@ -1,55 +1,42 @@
 package `fun`.hackathon.hima.ui.viewmodels
 
+import `fun`.hackathon.hima.data.model.Params
 import `fun`.hackathon.hima.data.model.PostDataModel
 import `fun`.hackathon.hima.data.services.FireStoreService
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Looper
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
-import com.google.android.gms.location.*
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.compose.CameraPositionState
-import com.google.maps.android.compose.rememberCameraPositionState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
 
 @HiltViewModel
 class InputViewModel @Inject constructor(
-    private  val fireStoreService: FireStoreService,
-    private  val fusedLocationProviderClient: FusedLocationProviderClient
-) :ViewModel() {
+    private val fireStoreService: FireStoreService,
+    private val fusedLocationProviderClient: FusedLocationProviderClient
+) : ViewModel() {
     val postModel = mutableStateOf(PostDataModel())
-    val positionState= CameraPositionState()
-    val latLngState= mutableStateOf(LatLng(0.0,0.0))
-//    var position= MutableStateFlow(LatLng(0.0,0.0))
-//    val locationRequest = LocationRequest.create().setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-//    .setFastestInterval(5000)
-//    .setInterval(10000)
-//    val lcb= object : LocationCallback() {
-//        override fun onLocationResult(locationResult: LocationResult) {
-//            for (location in locationResult.locations) {
-//                // 緯度の表示
-//                val str1 = " Latitude:" + location.latitude
-//                println(location)
-//                // 経度の表示
-//                val str2 = " Longitude:" + location.longitude
-//                position.value= LatLng(location.latitude,location.longitude)
-//            }
-//        }
-//    }
+    val positionState = CameraPositionState()
 
     fun addPost(): Boolean {
         return fireStoreService.addPost(post = postModel.value.copy(geoPoint = GeoPoint(0.0, 0.0)))
     }
-    fun fetchLocation(context: Context){
+
+    fun updateGeoPoint(latLng: LatLng) {
+        postModel.value =
+            postModel.value.copy(geoPoint = GeoPoint(latLng.latitude, latLng.longitude))
+    }
+
+    fun fetchLocation(context: Context) {
         if (ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -58,22 +45,21 @@ class InputViewModel @Inject constructor(
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            ActivityCompat.requestPermissions(
+                context as Activity,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                Params.REQUEST_CODE_LOCATION
+            )
             return
         }
         fusedLocationProviderClient.lastLocation.addOnSuccessListener {
-            latLngState.value= LatLng(it.latitude,it.longitude)
-            positionState.position=CameraPosition.fromLatLngZoom(LatLng(it.latitude,it.longitude),18f)
+            updateGeoPoint(LatLng(it.latitude, it.longitude))
+            positionState.position =
+                CameraPosition.fromLatLngZoom(LatLng(it.latitude, it.longitude), 18f)
             println(it)
-        }.addOnFailureListener{
+        }.addOnFailureListener {
             println(it)
-        }.addOnCompleteListener{
+        }.addOnCompleteListener {
             println(it)
         }
     }
