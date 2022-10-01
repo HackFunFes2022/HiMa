@@ -36,7 +36,7 @@ import com.google.maps.android.compose.MarkerState
 @Composable
 fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val navController = LocalNavController.current
-    val postList: MutableState<List<PostDataModel>> = remember {
+    val postList: MutableState<List<Map<String, Any>>> = remember {
         mutableStateOf(listOf())
     }
     val isShowDialog= remember {
@@ -46,12 +46,12 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
         if (snapshot == null) {
             return@addSnapshotListener
         }
-        val list = mutableListOf<PostDataModel>()
+        val list = mutableListOf<Map<String, Any>>()
         for (dc in snapshot.documents) {
             val data = dc.data
             if (data != null) {
-                val post = PostDataModel.fromMap(data)
-                list.add(post)
+                data["id"] = dc.id
+                list.add(data)
             }
         }
         postList.value = list
@@ -74,11 +74,28 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
             }
         }
     ) {
-
-        /**/
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter){
-            when{
-                isShowDialog.value->Box(){
+        GoogleMap(
+            modifier = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState
+        ) {
+            for (postMap in postList.value) {
+                val post = PostDataModel.fromMap(postMap)
+                val id = postMap["id"]
+                when {
+                    post.geoPoint != null -> Marker(
+                        title = post.title,
+                        snippet = post.description,
+                        state = MarkerState(
+                            LatLng(
+                                post.geoPoint.latitude,
+                                post.geoPoint.longitude
+                            )
+                        ),
+                        onInfoWindowClick = {
+                            //navController.navigate(NavItem.DetailScreen.name+"/"+id)
+                            //なぜかスタックする
+                        }
+                    )
                 }
             }
         }
