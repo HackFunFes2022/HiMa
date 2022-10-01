@@ -5,30 +5,26 @@ import `fun`.hackathon.hima.data.services.FireStoreService
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Looper
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
-import com.google.android.gms.location.*
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.compose.CameraPositionState
-import com.google.maps.android.compose.rememberCameraPositionState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
 
 @HiltViewModel
 class InputViewModel @Inject constructor(
-    private  val fireStoreService: FireStoreService,
-    private  val fusedLocationProviderClient: FusedLocationProviderClient
-) :ViewModel() {
+    private val fireStoreService: FireStoreService,
+    private val fusedLocationProviderClient: FusedLocationProviderClient
+) : ViewModel() {
     val postModel = mutableStateOf(PostDataModel())
-    val positionState= CameraPositionState()
-    val latLngState= mutableStateOf(LatLng(0.0,0.0))
+    val positionState = CameraPositionState()
+    val latLngState = mutableStateOf(LatLng(0.0, 0.0))
 //    var position= MutableStateFlow(LatLng(0.0,0.0))
 //    val locationRequest = LocationRequest.create().setPriority(Priority.PRIORITY_HIGH_ACCURACY)
 //    .setFastestInterval(5000)
@@ -49,7 +45,11 @@ class InputViewModel @Inject constructor(
     fun addPost(): Boolean {
         return fireStoreService.addPost(post = postModel.value.copy(geoPoint = GeoPoint(0.0, 0.0)))
     }
-    fun fetchLocation(context: Context){
+    fun updateGeoPoint(latLng: LatLng){
+        postModel.value=postModel.value.copy(geoPoint = GeoPoint(latLng.latitude,latLng.longitude))
+    }
+
+    fun fetchLocation(context: Context) {
         if (ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -68,12 +68,14 @@ class InputViewModel @Inject constructor(
             return
         }
         fusedLocationProviderClient.lastLocation.addOnSuccessListener {
-            latLngState.value= LatLng(it.latitude,it.longitude)
-            positionState.position=CameraPosition.fromLatLngZoom(LatLng(it.latitude,it.longitude),18f)
+            latLngState.value = LatLng(it.latitude, it.longitude)
+            updateGeoPoint(LatLng(it.latitude, it.longitude))
+            positionState.position =
+                CameraPosition.fromLatLngZoom(LatLng(it.latitude, it.longitude), 18f)
             println(it)
-        }.addOnFailureListener{
+        }.addOnFailureListener {
             println(it)
-        }.addOnCompleteListener{
+        }.addOnCompleteListener {
             println(it)
         }
     }
