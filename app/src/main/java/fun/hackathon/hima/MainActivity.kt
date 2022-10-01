@@ -47,8 +47,14 @@ class MainActivity : ComponentActivity() {
                         composable(NavItem.InputScreen.name) {
                             InputScreen()
                         }
-                        composable(NavItem.DetailScreen.name) {
-                            DetailScreen()
+                        composable(NavItem.DetailScreen.name + "/{id}") {
+                            val id = it.arguments?.getString("id")
+                            println(id)
+                            if (id == null) {
+                                DetailScreen(id = "null")
+                            } else {
+                                DetailScreen(id = id)
+                            }
                         }
                     }
                 }
