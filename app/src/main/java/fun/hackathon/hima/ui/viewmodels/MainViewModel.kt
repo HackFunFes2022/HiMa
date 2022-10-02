@@ -17,6 +17,9 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,8 +30,10 @@ class MainViewModel @Inject constructor(
 
     private val collection = fireStoreService.getCollection()
 
-    var nowLocationState by mutableStateOf(NowLocationState())
-    var mainUiState by mutableStateOf(MainUiState())
+    private val _nowLocationState = MutableStateFlow(NowLocationState())
+    var nowLocationState = _nowLocationState.asStateFlow()
+    private val _mainUiState = MutableStateFlow(MainUiState())
+    var mainUiState = _mainUiState.asStateFlow()
 
     fun startFetch(context: Context) {
         startFetchCollection()
@@ -40,6 +45,9 @@ class MainViewModel @Inject constructor(
             if (snapshot == null) {
                 return@addSnapshotListener
             }
+            if (e != null) {
+                _mainUiState.value = MainUiState(error = e)
+            }
             val postData: List<Posts> = snapshot.documents.map {
                 val data = it.data
                 if (data != null) {
@@ -49,7 +57,7 @@ class MainViewModel @Inject constructor(
                     Posts()
                 }
             }
-            mainUiState = mainUiState.copy(postData = postData)
+            _mainUiState.value = MainUiState(postData = postData)
         }
     }
 
@@ -69,7 +77,8 @@ class MainViewModel @Inject constructor(
             )
         }
         fusedLocationProviderClient.lastLocation.addOnSuccessListener {
-            nowLocationState = nowLocationState.copy(location = it)
+            _nowLocationState.value = NowLocationState(location = it)
+            Timber.d("lat: ${it.latitude}, lng: ${it.longitude}")
         }
     }
 }

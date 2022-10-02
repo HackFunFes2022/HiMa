@@ -6,9 +6,11 @@ import `fun`.hackathon.hima.data.model.Params
 import `fun`.hackathon.hima.data.model.PostDataModel
 import `fun`.hackathon.hima.data.model.Posts
 import `fun`.hackathon.hima.ui.viewmodels.MainViewModel
+import `fun`.hackathon.hima.util.toLatLng
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.location.Location
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -16,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -35,6 +38,7 @@ import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
+import timber.log.Timber
 
 @Composable
 fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
@@ -44,7 +48,8 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val postList: MutableState<List<Map<String, Any>>> = remember {
         mutableStateOf(listOf())
     }
-    val uiState by remember { mutableStateOf(viewModel.mainUiState) }
+    val uiState by viewModel.mainUiState.collectAsState()
+    val locationState by viewModel.nowLocationState.collectAsState()
     viewModel.startFetch(context = context)
 
     Scaffold(
@@ -65,16 +70,14 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
             }
         }
     ) {
-        var detailMap = PostDataModel(title = "test").toMap().toMutableMap()
-        detailMap["id"] = "1234"
-        MainContent(LatLng(0.0, 0.0), uiState.postData)
+        MainContent(locationState.location, uiState.postData)
         //PopUp(map = detailMap)
     }
 }
 
 @Composable
-fun MainContent(latLng: LatLng, postsList: List<Posts>) {
-    val cameraPosition = CameraPosition.fromLatLngZoom(latLng, 18f)
+fun MainContent(location: Location, postsList: List<Posts>) {
+    val cameraPosition = CameraPosition.fromLatLngZoom(location.toLatLng(), 18f)
     val cameraPositionState = CameraPositionState(cameraPosition)
     val context = LocalContext.current
 
@@ -152,5 +155,4 @@ fun PopUp(posts: Posts) {
                 }, content = { Text(text = "詳細表示") })//なぜか表示されない
         }
     }
-
 }
