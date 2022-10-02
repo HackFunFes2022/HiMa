@@ -5,6 +5,7 @@ import `fun`.hackathon.hima.R
 import `fun`.hackathon.hima.data.model.Params
 import `fun`.hackathon.hima.data.model.PostDataModel
 import `fun`.hackathon.hima.data.model.Posts
+import `fun`.hackathon.hima.ui.component.LoadingCircle
 import `fun`.hackathon.hima.ui.viewmodels.MainViewModel
 import `fun`.hackathon.hima.util.toLatLng
 import android.Manifest
@@ -45,9 +46,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val navController = LocalNavController.current
     val context = LocalContext.current
 
-    val postList: MutableState<List<Map<String, Any>>> = remember {
-        mutableStateOf(listOf())
-    }
     val uiState by viewModel.mainUiState.collectAsState()
     val locationState by viewModel.nowLocationState.collectAsState()
     viewModel.startFetch(context = context)
@@ -70,8 +68,36 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
             }
         }
     ) {
-        MainContent(locationState.location, uiState.postData)
-        //PopUp(map = detailMap)
+        when {
+            uiState.error != null -> {
+                val e = uiState.error
+                val openDialog = remember { mutableStateOf(true) }
+                Timber.e(e)
+
+                if (openDialog.value) {
+                    AlertDialog(
+                        onDismissRequest = { /* 空白にすると画面外タップでダイアログが消える */ },
+                        title = { Text("${e!!.cause}") },
+                        text = { Text("${e!!.message}") },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    openDialog.value = false
+                                }
+                            ) {
+                                Text(stringResource(id = R.string.dialog_ok))
+                            }
+                        }
+                    )
+                }
+            }
+            uiState.loading -> {
+                LoadingCircle()
+            }
+            else -> {
+                MainContent(locationState.location, uiState.postData)
+            }
+        }
     }
 }
 
@@ -82,7 +108,7 @@ fun MainContent(location: Location, postsList: List<Posts>) {
     val context = LocalContext.current
 
     val isShowPopUp = remember { mutableStateOf(false) }
-    val detailPosts = remember { mutableStateOf(Posts(id = "1234")) }
+    val detailPosts = remember { mutableStateOf(Posts()) }
 
     if (ContextCompat.checkSelfPermission(
             context,
@@ -148,11 +174,17 @@ fun PopUp(posts: Posts) {
             modifier = Modifier.padding(vertical = 10.dp),
             color = Color.Black
         )
-        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-            Button(colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray),
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            Button(
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray),
                 onClick = {
                     navController.navigate(NavItem.DetailScreen.name + "/" + posts.id)
-                }, content = { Text(text = "詳細表示") })//なぜか表示されない
+                },
+                content = { Text(text = "詳細表示") }
+            )//なぜか表示されない
         }
     }
 }

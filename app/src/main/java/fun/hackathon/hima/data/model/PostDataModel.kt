@@ -15,7 +15,7 @@ data class PostDataModel(
             return PostDataModel(
                 title = map["title"] as String,
                 description = map["description"] as String,
-                geoPoint = map["geoPoint"] as GeoPoint,
+                geoPoint = (map["geoPoint"] ?: GeoPoint(0.0, 0.0)) as GeoPoint,
                 time = map["time"] as Timestamp
             )
         }

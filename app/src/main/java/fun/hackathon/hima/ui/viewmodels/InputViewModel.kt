@@ -3,6 +3,7 @@ package `fun`.hackathon.hima.ui.viewmodels
 import `fun`.hackathon.hima.data.model.Params
 import `fun`.hackathon.hima.data.model.PostDataModel
 import `fun`.hackathon.hima.data.services.FireStoreService
+import `fun`.hackathon.hima.util.toLatLng
 import android.Manifest
 import android.app.Activity
 import android.content.Context
@@ -53,9 +54,9 @@ class InputViewModel @Inject constructor(
             return
         }
         fusedLocationProviderClient.lastLocation.addOnSuccessListener {
-            updateGeoPoint(LatLng(it.latitude, it.longitude))
+            updateGeoPoint(it.toLatLng())
             positionState.position =
-                CameraPosition.fromLatLngZoom(LatLng(it.latitude, it.longitude), 18f)
+                CameraPosition.fromLatLngZoom(it.toLatLng(), 18f)
             println(it)
         }.addOnFailureListener {
             println(it)
