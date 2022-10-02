@@ -8,9 +8,8 @@ import `fun`.hackathon.hima.ui.viewmodels.MainViewModel
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -20,8 +19,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -74,11 +75,34 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
             }
         }
     ) {
+        var detailMap= PostDataModel(title = "test").toMap().toMutableMap()
+        detailMap["id"]="1234"
+        //MainContent()
+        //PopUp(map = detailMap)
+    }
+}
+
+@Composable
+fun MainContent(latLng: LatLng,postList:List<Map<String,Any>>) {
+    val cameraPosition = CameraPosition.fromLatLngZoom(latLng, 18f)
+    val cameraPositionState = CameraPositionState(cameraPosition)
+    val context = LocalContext.current
+    val isShowPopUp= remember {
+        mutableStateOf(false)
+    }
+    var detailMap= PostDataModel(title = "test").toMap().toMutableMap()
+    detailMap["id"]="1234"
+    if (ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    ) {
+
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState
         ) {
-            for (postMap in postList.value) {
+            for (postMap in postList) {
                 val post = PostDataModel.fromMap(postMap)
                 val id = postMap["id"]
                 when {
@@ -94,42 +118,16 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                         onInfoWindowClick = {
                             //navController.navigate(NavItem.DetailScreen.name+"/"+id)
                             //なぜかスタックする
+                            detailMap=postMap.toMutableMap()
+                            isShowPopUp.value=true
                         }
                     )
                 }
             }
         }
-        // MainContent()
-    }
-}
-
-@Composable
-fun MainContent(latLng: LatLng,postList:List<Map<String,Any>>) {
-    val cameraPosition = CameraPosition.fromLatLngZoom(latLng, 10f)
-    val cameraPositionState = CameraPositionState(cameraPosition)
-    val context = LocalContext.current
-
-    if (ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-    ) {
-
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState
-        ) {
-            for (post in postList) {
-                when {
-                    post.geoPoint != null -> Marker(
-                        state = MarkerState(
-                            LatLng(
-                                post.geoPoint.latitude,
-                                post.geoPoint.longitude
-                            )
-                        )
-                    )
-                }
+        when{
+            isShowPopUp.value->Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter){
+                PopUp(map = detailMap)
             }
         }
     } else {
@@ -141,4 +139,27 @@ fun MainContent(latLng: LatLng,postList:List<Map<String,Any>>) {
             Params.REQUEST_CODE_LOCATION
         )
     }
+}
+
+@Composable
+fun PopUp(map:Map<String,Any?>){
+    val post=PostDataModel.fromMap(map)
+    val id=map["id"] as String
+    val navController= LocalNavController.current
+    Column(
+        Modifier
+            .background(Color.White)
+            .padding(bottom = 20.dp)
+            .fillMaxWidth(0.8f)
+            .height(100.dp)) {
+        Text(text = post.title, modifier = Modifier.padding(vertical = 10.dp), color = Color.Black)
+        Text(text = post.description, modifier = Modifier.padding(vertical = 10.dp),color = Color.Black)
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd){
+            Button(colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray),
+                onClick = {
+                    navController.navigate(NavItem.DetailScreen.name+"/"+id)
+                }, content = {Text(text = "詳細表示")})//なぜか表示されない
+        }
+    }
+
 }

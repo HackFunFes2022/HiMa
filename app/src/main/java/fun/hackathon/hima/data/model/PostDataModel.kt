@@ -11,7 +11,7 @@ data class PostDataModel(
     val time: Timestamp = Timestamp.now()
 ) {
     companion object {
-        fun fromMap(map: Map<String, Any>): PostDataModel {
+        fun fromMap(map: Map<String, Any?>): PostDataModel {
             val data = PostDataModel(
                 title = map["title"] as String,
                 description = map["description"] as String,
@@ -21,5 +21,13 @@ data class PostDataModel(
             println(data)
             return data
         }
+    }
+    fun toMap(): Map<String, Any?> {
+        return mapOf<String,Any?>(
+            "title" to title,
+            "description" to description,
+            "time" to time,
+            "geoPoint" to geoPoint,
+        )
     }
 }
