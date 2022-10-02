@@ -22,8 +22,9 @@ data class PostDataModel(
             return data
         }
     }
+
     fun toMap(): Map<String, Any?> {
-        return mapOf<String,Any?>(
+        return mapOf<String, Any?>(
             "title" to title,
             "description" to description,
             "time" to time,

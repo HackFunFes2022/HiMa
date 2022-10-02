@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,7 +39,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val postList: MutableState<List<Map<String, Any>>> = remember {
         mutableStateOf(listOf())
     }
-    val isShowDialog= remember {
+    val isShowDialog = remember {
         mutableStateOf(false)
     }
     viewModel.collection.addSnapshotListener { snapshot, e ->
@@ -75,23 +74,23 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
             }
         }
     ) {
-        var detailMap= PostDataModel(title = "test").toMap().toMutableMap()
-        detailMap["id"]="1234"
+        var detailMap = PostDataModel(title = "test").toMap().toMutableMap()
+        detailMap["id"] = "1234"
         //MainContent()
         //PopUp(map = detailMap)
     }
 }
 
 @Composable
-fun MainContent(latLng: LatLng,postList:List<Map<String,Any>>) {
+fun MainContent(latLng: LatLng, postList: List<Map<String, Any>>) {
     val cameraPosition = CameraPosition.fromLatLngZoom(latLng, 18f)
     val cameraPositionState = CameraPositionState(cameraPosition)
     val context = LocalContext.current
-    val isShowPopUp= remember {
+    val isShowPopUp = remember {
         mutableStateOf(false)
     }
-    var detailMap= PostDataModel(title = "test").toMap().toMutableMap()
-    detailMap["id"]="1234"
+    var detailMap = PostDataModel(title = "test").toMap().toMutableMap()
+    detailMap["id"] = "1234"
     if (ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -118,15 +117,18 @@ fun MainContent(latLng: LatLng,postList:List<Map<String,Any>>) {
                         onInfoWindowClick = {
                             //navController.navigate(NavItem.DetailScreen.name+"/"+id)
                             //なぜかスタックする
-                            detailMap=postMap.toMutableMap()
-                            isShowPopUp.value=true
+                            detailMap = postMap.toMutableMap()
+                            isShowPopUp.value = true
                         }
                     )
                 }
             }
         }
-        when{
-            isShowPopUp.value->Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter){
+        when {
+            isShowPopUp.value -> Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
                 PopUp(map = detailMap)
             }
         }
@@ -142,23 +144,28 @@ fun MainContent(latLng: LatLng,postList:List<Map<String,Any>>) {
 }
 
 @Composable
-fun PopUp(map:Map<String,Any?>){
-    val post=PostDataModel.fromMap(map)
-    val id=map["id"] as String
-    val navController= LocalNavController.current
+fun PopUp(map: Map<String, Any?>) {
+    val post = PostDataModel.fromMap(map)
+    val id = map["id"] as String
+    val navController = LocalNavController.current
     Column(
         Modifier
             .background(Color.White)
             .padding(bottom = 20.dp)
             .fillMaxWidth(0.8f)
-            .height(100.dp)) {
+            .height(100.dp)
+    ) {
         Text(text = post.title, modifier = Modifier.padding(vertical = 10.dp), color = Color.Black)
-        Text(text = post.description, modifier = Modifier.padding(vertical = 10.dp),color = Color.Black)
-        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd){
+        Text(
+            text = post.description,
+            modifier = Modifier.padding(vertical = 10.dp),
+            color = Color.Black
+        )
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
             Button(colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray),
                 onClick = {
-                    navController.navigate(NavItem.DetailScreen.name+"/"+id)
-                }, content = {Text(text = "詳細表示")})//なぜか表示されない
+                    navController.navigate(NavItem.DetailScreen.name + "/" + id)
+                }, content = { Text(text = "詳細表示") })//なぜか表示されない
         }
     }
 
