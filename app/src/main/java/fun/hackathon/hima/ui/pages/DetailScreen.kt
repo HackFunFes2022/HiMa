@@ -1,6 +1,7 @@
 package `fun`.hackathon.hima.ui.pages
 
 import `fun`.hackathon.hima.data.model.PostDataModel
+import `fun`.hackathon.hima.data.services.firestore.CollectionNames
 import `fun`.hackathon.hima.ui.viewmodels.DetailViewModel
 import `fun`.hackathon.hima.ui.viewmodels.InputViewModel
 import androidx.compose.foundation.layout.*
@@ -30,6 +31,9 @@ fun DetailScreen(id: String,viewModel: DetailViewModel = hiltViewModel()) {
     }
     doc.get().addOnSuccessListener {
         post.value=PostDataModel.fromMap(it.data!!)
+    }
+    doc.collection(CollectionNames.Comments.tag).get().addOnSuccessListener {
+        for (val snap in it.documents){
     }
     Scaffold(
         topBar = {
