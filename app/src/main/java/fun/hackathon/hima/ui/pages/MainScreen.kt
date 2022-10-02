@@ -4,6 +4,7 @@ import `fun`.hackathon.hima.LocalNavController
 import `fun`.hackathon.hima.R
 import `fun`.hackathon.hima.data.model.Params
 import `fun`.hackathon.hima.data.model.PostDataModel
+import `fun`.hackathon.hima.data.model.Posts
 import `fun`.hackathon.hima.ui.viewmodels.MainViewModel
 import android.Manifest
 import android.app.Activity
@@ -17,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,26 +39,14 @@ import com.google.maps.android.compose.MarkerState
 @Composable
 fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val navController = LocalNavController.current
+    val context = LocalContext.current
+
     val postList: MutableState<List<Map<String, Any>>> = remember {
         mutableStateOf(listOf())
     }
-    val isShowDialog = remember {
-        mutableStateOf(false)
-    }
-    viewModel.collection.addSnapshotListener { snapshot, e ->
-        if (snapshot == null) {
-            return@addSnapshotListener
-        }
-        val list = mutableListOf<Map<String, Any>>()
-        for (dc in snapshot.documents) {
-            val data = dc.data
-            if (data != null) {
-                data["id"] = dc.id
-                list.add(data)
-            }
-        }
-        postList.value = list
-    }
+    val uiState by remember { mutableStateOf(viewModel.mainUiState) }
+    viewModel.startFetch(context = context)
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -76,60 +67,54 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     ) {
         var detailMap = PostDataModel(title = "test").toMap().toMutableMap()
         detailMap["id"] = "1234"
-        //MainContent()
+        MainContent(LatLng(0.0, 0.0), uiState.postData)
         //PopUp(map = detailMap)
     }
 }
 
 @Composable
-fun MainContent(latLng: LatLng, postList: List<Map<String, Any>>) {
+fun MainContent(latLng: LatLng, postsList: List<Posts>) {
     val cameraPosition = CameraPosition.fromLatLngZoom(latLng, 18f)
     val cameraPositionState = CameraPositionState(cameraPosition)
     val context = LocalContext.current
-    val isShowPopUp = remember {
-        mutableStateOf(false)
-    }
-    var detailMap = PostDataModel(title = "test").toMap().toMutableMap()
-    detailMap["id"] = "1234"
+
+    val isShowPopUp = remember { mutableStateOf(false) }
+    val detailPosts = remember { mutableStateOf(Posts(id = "1234")) }
+
     if (ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
     ) {
-
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState
         ) {
-            for (postMap in postList) {
-                val post = PostDataModel.fromMap(postMap)
-                val id = postMap["id"]
-                when {
-                    post.geoPoint != null -> Marker(
-                        title = post.title,
-                        snippet = post.description,
-                        state = MarkerState(
-                            LatLng(
-                                post.geoPoint.latitude,
-                                post.geoPoint.longitude
-                            )
-                        ),
-                        onInfoWindowClick = {
-                            //navController.navigate(NavItem.DetailScreen.name+"/"+id)
-                            //なぜかスタックする
-                            detailMap = postMap.toMutableMap()
-                            isShowPopUp.value = true
-                        }
-                    )
-                }
+            for (posts in postsList) {
+                Marker(
+                    title = posts.title,
+                    snippet = posts.description,
+                    state = MarkerState(
+                        LatLng(
+                            posts.geoPoint.latitude,
+                            posts.geoPoint.longitude
+                        )
+                    ),
+                    onInfoWindowClick = {
+                        //navController.navigate(NavItem.DetailScreen.name+"/"+id)
+                        //なぜかスタックする
+                        detailPosts.value = posts
+                        isShowPopUp.value = true
+                    }
+                )
             }
         }
-        when {
-            isShowPopUp.value -> Box(
+        if (isShowPopUp.value) {
+            Box(
                 Modifier.fillMaxSize(),
                 contentAlignment = Alignment.BottomCenter
             ) {
-                PopUp(map = detailMap)
+                PopUp(detailPosts.value)
             }
         }
     } else {
@@ -144,10 +129,9 @@ fun MainContent(latLng: LatLng, postList: List<Map<String, Any>>) {
 }
 
 @Composable
-fun PopUp(map: Map<String, Any?>) {
-    val post = PostDataModel.fromMap(map)
-    val id = map["id"] as String
+fun PopUp(posts: Posts) {
     val navController = LocalNavController.current
+
     Column(
         Modifier
             .background(Color.White)
@@ -155,16 +139,16 @@ fun PopUp(map: Map<String, Any?>) {
             .fillMaxWidth(0.8f)
             .height(100.dp)
     ) {
-        Text(text = post.title, modifier = Modifier.padding(vertical = 10.dp), color = Color.Black)
+        Text(text = posts.title, modifier = Modifier.padding(vertical = 10.dp), color = Color.Black)
         Text(
-            text = post.description,
+            text = posts.description,
             modifier = Modifier.padding(vertical = 10.dp),
             color = Color.Black
         )
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
             Button(colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray),
                 onClick = {
-                    navController.navigate(NavItem.DetailScreen.name + "/" + id)
+                    navController.navigate(NavItem.DetailScreen.name + "/" + posts.id)
                 }, content = { Text(text = "詳細表示") })//なぜか表示されない
         }
     }

@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 class FireStoreService @Inject constructor() : FireStoreInputScreenInterface {
     override fun addPost(post: PostDataModel): Boolean {
-        if (post.title != "" && post.geoPoint != null) {
+        if (post.title.isNotBlank()) {
             Firebase.firestore.collection(CollectionNames.Posts.tag).add(post)
             return true
         }
