@@ -37,6 +37,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import timber.log.Timber
@@ -95,16 +96,20 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 LoadingCircle()
             }
             else -> {
-                MainContent(locationState.location, uiState.postData)
+                val cameraPosition = CameraPosition.fromLatLngZoom(locationState.location.toLatLng(), 18f)
+                val cameraPositionState = CameraPositionState(cameraPosition)
+                Timber.d("${uiState.postData}")
+                MainContent(cameraPositionState, uiState.postData)
             }
         }
     }
 }
 
 @Composable
-fun MainContent(location: Location, postsList: List<Posts>) {
-    val cameraPosition = CameraPosition.fromLatLngZoom(location.toLatLng(), 18f)
-    val cameraPositionState = CameraPositionState(cameraPosition)
+fun MainContent(
+    cameraPositionState: CameraPositionState,
+    postsList: List<Posts>,
+) {
     val context = LocalContext.current
 
     val isShowPopUp = remember { mutableStateOf(false) }
@@ -117,7 +122,8 @@ fun MainContent(location: Location, postsList: List<Posts>) {
     ) {
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState
+            cameraPositionState = cameraPositionState,
+            properties = MapProperties(isMyLocationEnabled = true)
         ) {
             for (posts in postsList) {
                 Marker(
@@ -129,6 +135,11 @@ fun MainContent(location: Location, postsList: List<Posts>) {
                             posts.geoPoint.longitude
                         )
                     ),
+                    onClick = {
+                        detailPosts.value = posts
+                        isShowPopUp.value = true
+                        true
+                    },
                     onInfoWindowClick = {
                         //navController.navigate(NavItem.DetailScreen.name+"/"+id)
                         //なぜかスタックする
