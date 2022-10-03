@@ -3,6 +3,7 @@ package `fun`.hackathon.hima.data.services
 import `fun`.hackathon.hima.data.model.PostDataModel
 import `fun`.hackathon.hima.data.services.firestore.CollectionNames
 import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import dagger.Binds
@@ -22,6 +23,10 @@ class FireStoreService @Inject constructor() : FireStoreInputScreenInterface {
 
     fun getCollection(): CollectionReference {
         return Firebase.firestore.collection(CollectionNames.Posts.tag)
+    }
+
+    fun getPostDocument(id:String): DocumentReference {
+        return Firebase.firestore.collection(CollectionNames.Posts.tag).document(id)
     }
 }
 
