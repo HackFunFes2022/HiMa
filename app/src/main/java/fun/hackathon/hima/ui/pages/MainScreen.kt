@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -58,6 +59,12 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
             TopAppBar(
                 title = {
                     Text(stringResource(id = R.string.app_name))
+                },
+                actions = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_google_icon),
+                        contentDescription = ""
+                    )
                 }
             )
         },
