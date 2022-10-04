@@ -36,6 +36,7 @@ class MainViewModel @Inject constructor(
     var mainUiState = _mainUiState.asStateFlow()
 
     fun startFetch(context: Context) {
+        _mainUiState.value = MainUiState(loading = true)
         startFetchCollection()
         startFetchLocation(context)
     }
