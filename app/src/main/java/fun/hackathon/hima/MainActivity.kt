@@ -1,12 +1,14 @@
 package `fun`.hackathon.hima
 
 
+import `fun`.hackathon.hima.ui.component.FirebaseScaffold
 import `fun`.hackathon.hima.ui.pages.DetailScreen
 import `fun`.hackathon.hima.ui.pages.InputScreen
 import `fun`.hackathon.hima.ui.pages.MainScreen
 import `fun`.hackathon.hima.ui.pages.NavItem
 import `fun`.hackathon.hima.ui.theme.HiMaTheme
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.Text
@@ -28,32 +30,34 @@ val LocalNavController = staticCompositionLocalOf<NavHostController> {
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         setContent {
             HiMaTheme {
                 val navController = rememberNavController()
-
-                CompositionLocalProvider(
-                    LocalNavController provides navController
-                ) {
-                    NavHost(
-                        navController = navController,
-                        startDestination = NavItem.MainScreen.name
+                FirebaseScaffold {
+                    CompositionLocalProvider(
+                        LocalNavController provides navController
                     ) {
-                        composable(NavItem.MainScreen.name) {
-                            MainScreen()
-                        }
-                        composable(NavItem.InputScreen.name) {
-                            InputScreen()
-                        }
-                        composable(NavItem.DetailScreen.name + "/{id}") {
-                            val id = it.arguments?.getString("id")
-                            println(id)
-                            if (id == null) {
-                                DetailScreen(id = "null")
-                            } else {
-                                DetailScreen(id = id)
+                        NavHost(
+                            navController = navController,
+                            startDestination = NavItem.MainScreen.name
+                        ) {
+                            composable(NavItem.MainScreen.name) {
+                                MainScreen()
+                            }
+                            composable(NavItem.InputScreen.name) {
+                                InputScreen()
+                            }
+                            composable(NavItem.DetailScreen.name + "/{id}") {
+                                val id = it.arguments?.getString("id")
+                                println(id)
+                                if (id == null) {
+                                    DetailScreen(id = "null")
+                                } else {
+                                    DetailScreen(id = id)
+                                }
                             }
                         }
                     }
