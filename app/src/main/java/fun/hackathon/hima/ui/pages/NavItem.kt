@@ -6,4 +6,5 @@ sealed class NavItem(
     object MainScreen : NavItem("main")
     object InputScreen : NavItem("input")
     object DetailScreen : NavItem("detail")
+    object DetailTestScreen : NavItem("detailTest")
 }
