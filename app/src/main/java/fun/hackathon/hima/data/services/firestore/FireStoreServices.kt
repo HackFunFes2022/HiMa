@@ -16,6 +16,8 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import dagger.Binds
@@ -26,6 +28,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
+private val collectionReference = Firebase.firestore.collection(CollectionNames.Posts.tag)
+
 class FireStoreService @Inject constructor() : FireStoreInputScreenInterface {
     override fun addPost(post: PostDataModel): Boolean {
         if (post.title != "" && post.geoPoint != null) {
@@ -35,11 +39,44 @@ class FireStoreService @Inject constructor() : FireStoreInputScreenInterface {
         return false
     }
 
+    fun like(
+        path: String,
+        onSuccessListener: () -> Unit = {},
+        onFailureListener: (it: Exception) -> Unit = {}
+    ) {
+        Firebase.firestore.collection(CollectionNames.Posts.tag).document(path)
+            .collection(CollectionNames.Likes.tag).document(Firebase.auth.currentUser!!.uid).set(
+                mapOf<String, String>()
+            ).addOnSuccessListener {
+                onSuccessListener()
+            }.addOnFailureListener(onFailureListener)
+    }
+
+    fun unLike(
+        path: String,
+        onSuccessListener: () -> Unit = {},
+        onFailureListener: (it: Exception) -> Unit = {}
+    ) {
+        Firebase.firestore.collection(CollectionNames.Posts.tag).document(path)
+            .collection(CollectionNames.Likes.tag).document(Firebase.auth.currentUser!!.uid)
+            .delete().addOnSuccessListener {
+                onSuccessListener()
+            }.addOnFailureListener(onFailureListener)
+    }
+
+    fun listenLikes(
+        path: String,
+        snapShotListener: (snapshot: QuerySnapshot?, e: FirebaseFirestoreException?) -> Unit
+    ) {
+        Firebase.firestore.collection(CollectionNames.Posts.tag).document(path)
+            .collection(CollectionNames.Likes.tag).addSnapshotListener(snapShotListener)
+    }
+
     fun getCollection(): CollectionReference {
         return Firebase.firestore.collection(CollectionNames.Posts.tag)
     }
 
-    fun getPostDocument(id:String): DocumentReference {
+    fun getPostDocument(id: String): DocumentReference {
         return Firebase.firestore.collection(CollectionNames.Posts.tag).document(id)
     }
 }

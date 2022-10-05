@@ -59,6 +59,10 @@ class MainActivity : ComponentActivity() {
                                     DetailScreen(id = id)
                                 }
                             }
+                            composable(NavItem.DetailTestScreen.name) {
+                                val id = "TvmftN51D4h3E0OSURBd"
+                                DetailScreen(id = id)
+                            }
                         }
                     }
                 }
