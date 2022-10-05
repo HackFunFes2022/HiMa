@@ -3,6 +3,7 @@ package `fun`.hackathon.hima.ui.pages
 import `fun`.hackathon.hima.data.model.CommentDataModel
 import `fun`.hackathon.hima.data.model.PostDataModel
 import `fun`.hackathon.hima.data.services.firestore.CollectionNames
+import `fun`.hackathon.hima.ui.component.LikeButton
 import `fun`.hackathon.hima.ui.viewmodels.DetailViewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -63,13 +64,7 @@ fun DetailScreen(id: String,viewModel: DetailViewModel = hiltViewModel()) {
             ) {
                 Text(text = post.value.description)
             }
-            Row(
-                horizontalArrangement = Arrangement.Center, modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 10.dp)
-            ) {
-                Text(text = "コメント")
-            }
+            LikeRow(path = id)
             LazyColumn {
                 items(comments.value) {
                     Text(text = it.comment)
@@ -111,5 +106,17 @@ fun CommentBox(onSubmit: (it: String) -> Unit) {
                     }
                 }
         }
+    }
+}
+
+@Composable
+fun LikeRow(modifier: Modifier = Modifier, path: String) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "コメントを投稿する")
+        LikeButton(path = path)
     }
 }
