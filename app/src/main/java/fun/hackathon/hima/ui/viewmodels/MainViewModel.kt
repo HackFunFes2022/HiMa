@@ -9,10 +9,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
-import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.location.FusedLocationProviderClient

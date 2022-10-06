@@ -1,5 +1,7 @@
 package `fun`.hackathon.hima.data.model
 
+import `fun`.hackathon.hima.util.toLatLng
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
 

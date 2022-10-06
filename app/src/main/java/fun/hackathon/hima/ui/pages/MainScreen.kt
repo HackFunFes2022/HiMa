@@ -10,33 +10,54 @@ import `fun`.hackathon.hima.util.toLatLng
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideIn
+import androidx.compose.animation.slideOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @Composable
@@ -99,7 +120,8 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 LoadingCircle()
             }
             else -> {
-                val cameraPosition = CameraPosition.fromLatLngZoom(locationState.location.toLatLng(), 18f)
+                val cameraPosition =
+                    CameraPosition.fromLatLngZoom(locationState.location.toLatLng(), 18f)
                 val cameraPositionState = CameraPositionState(cameraPosition)
                 Timber.d("${uiState.postData}")
                 MainContent(cameraPositionState, uiState.postData)
@@ -114,6 +136,7 @@ fun MainContent(
     postsList: List<Posts>,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     val isShowPopUp = remember { mutableStateOf(false) }
     val detailPosts = remember { mutableStateOf(Posts()) }
@@ -126,7 +149,13 @@ fun MainContent(
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            properties = MapProperties(isMyLocationEnabled = true)
+            properties = MapProperties(isMyLocationEnabled = true),
+            // FABに被ったので、一旦ZoomControlsを消してる
+            // TODO: ZoomControlsをどうするか検討
+            uiSettings = MapUiSettings(zoomControlsEnabled = false),
+            onMapClick = {
+                isShowPopUp.value = false
+            }
         ) {
             for (posts in postsList) {
                 Marker(
@@ -139,27 +168,23 @@ fun MainContent(
                         )
                     ),
                     onClick = {
+                        scope.launch {
+                            cameraPositionState.animate(
+                                update = CameraUpdateFactory.newCameraPosition(
+                                    CameraPosition(posts.geoPoint.toLatLng(), 18f, 0f, 0f)
+                                ),
+                                durationMs = 1000
+                            )
+                        }
+
                         detailPosts.value = posts
                         isShowPopUp.value = true
                         true
-                    },
-                    onInfoWindowClick = {
-                        //navController.navigate(NavItem.DetailScreen.name+"/"+id)
-                        //なぜかスタックする
-                        detailPosts.value = posts
-                        isShowPopUp.value = true
                     }
                 )
             }
         }
-        if (isShowPopUp.value) {
-            Box(
-                Modifier.fillMaxSize(),
-                contentAlignment = Alignment.BottomCenter
-            ) {
-                PopUp(detailPosts.value)
-            }
-        }
+        PostsPopUp(isShowPopUp.value, detailPosts.value)
     } else {
         // 許可ダイアログ出しといた方が良さそう
         // 許可求める
@@ -172,33 +197,71 @@ fun MainContent(
 }
 
 @Composable
-fun PopUp(posts: Posts) {
+fun PostsPopUp(isVisible: Boolean, posts: Posts) {
     val navController = LocalNavController.current
+    val popupHeight = 220.dp
 
-    Column(
-        Modifier
-            .background(Color.White)
-            .padding(bottom = 20.dp)
-            .fillMaxWidth(0.8f)
-            .height(100.dp)
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter
     ) {
-        Text(text = posts.title, modifier = Modifier.padding(vertical = 10.dp), color = Color.Black)
-        Text(
-            text = posts.description,
-            modifier = Modifier.padding(vertical = 10.dp),
-            color = Color.Black
-        )
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.CenterEnd
+        AnimatedVisibility(
+            visible = isVisible,
+            enter = slideIn(tween(100, easing = LinearOutSlowInEasing)) { fullSize ->
+                IntOffset(0, fullSize.height - popupHeight.value.toInt())
+            },
+            exit = slideOut(tween(100, easing = FastOutSlowInEasing)) { fullSize ->
+                IntOffset(0, fullSize.height)
+            }
         ) {
-            Button(
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray),
-                onClick = {
-                    navController.navigate(NavItem.DetailScreen.name + "/" + posts.id)
-                },
-                content = { Text(text = "詳細表示") }
-            )//なぜか表示されない
+            Box(
+                modifier = Modifier
+                    .height(popupHeight)
+                    .fillMaxWidth(0.8f)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .border(
+                            width = 2.dp,
+                            color = MaterialTheme.colors.primary,
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .background(
+                            color = Color.White,
+                            shape = RoundedCornerShape(10)
+                        )
+                        .padding(start = 8.dp, end = 8.dp)
+                ) {
+                    Spacer(modifier = Modifier.padding(4.dp))
+                    Text(
+                        text = posts.title,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.body1,
+
+                    )
+                    Spacer(modifier = Modifier.padding(4.dp))
+                    Text(
+                        text = posts.description,
+                        color = Color.Black,
+                        style = MaterialTheme.typography.body2
+                    )
+                    Spacer(modifier = Modifier.padding(4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Button(
+                            onClick = {
+                                navController.navigate(NavItem.DetailScreen.name + "/" + posts.id)
+                            }
+                        ) {
+                            Text(text = "詳細表示")
+                        }
+                    }
+                    Spacer(modifier = Modifier.padding(4.dp))
+                }
+            }
         }
     }
 }
