@@ -21,7 +21,8 @@ import com.google.firebase.ktx.Firebase
 fun LikeButton(
     modifier: Modifier = Modifier,
     fireStoreService: FireStoreService = FireStoreService(),
-    path: String
+    path: String,
+    color: Color = Color.White
 ) {
     val colors = listOf(Color.Gray, Color.Yellow)
     val likes = remember {
@@ -46,7 +47,7 @@ fun LikeButton(
                 "${likes.value.count()}"
             } else {
                 ""
-            }
+            }, color = color
         )
 
         IconButton(onClick = {
