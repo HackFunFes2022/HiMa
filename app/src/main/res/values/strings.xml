@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">HiMa</string>
 
+    <!-- Share -->
     <string name="dialog_ok">OK</string>
+
+    <!-- MainScreen -->
+    <string name="main_popup_detail_button">詳細を表示</string>
 </resources>

@@ -249,7 +249,7 @@ fun PostsPopUp(isVisible: Boolean, posts: Posts) {
                                 navController.navigate(NavItem.DetailScreen.name + "/" + posts.id)
                             }
                         ) {
-                            Text(text = "詳細表示")
+                            Text(text = stringResource(id = R.string.main_popup_detail_button))
                         }
                     }
                     Spacer(modifier = Modifier.padding(4.dp))
