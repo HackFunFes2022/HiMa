@@ -2,9 +2,14 @@ package `fun`.hackathon.hima.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Typography
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
 private val DarkColorPalette = darkColors(
     primary = Purple200,
@@ -35,9 +40,28 @@ fun HiMaTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable (
         LightColorPalette
     }
 
+    val HiMaTypography = Typography(
+        h1 = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontWeight = FontWeight.W300,
+            fontSize = 96.sp
+        ),
+        body1 = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontWeight = FontWeight.W600,
+            fontSize = 16.sp
+        ),
+        body2 = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontWeight = FontWeight.Normal,
+            fontSize = 14.sp
+        )
+        /*...*/
+    )
+
     MaterialTheme(
         colors = colors,
-        typography = Typography,
+        typography = HiMaTypography,
         shapes = Shapes,
         content = content
     )

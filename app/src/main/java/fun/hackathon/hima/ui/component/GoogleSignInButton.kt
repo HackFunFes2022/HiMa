@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseUser
+import timber.log.Timber
 
 
 @Composable
@@ -27,9 +28,11 @@ fun GoogleSignInButton(modifier: Modifier, user: MutableState<FirebaseUser?>) {
     val launcher = rememberFirebaseAuthLauncher(
         onAuthComplete = { result ->
             user.value = result.user
+            Timber.d("$result")
         },
         onAuthError = {
             user.value = null
+            Timber.e(it)
         }
     )
     val token = stringResource(R.string.default_web_client_id)
