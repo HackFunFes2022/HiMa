@@ -29,7 +29,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 
-class FireStoreService @Inject constructor() : FireStoreInputScreenInterface {
+class FireStoreService @Inject constructor() : FireStoreInputScreenInterface,FireStoreLikeInterface {
     override fun addPost(post: PostDataModel, onSuccessListener: (it:DocumentReference)->Unit, onFailureListener: (it: Exception) -> Unit){
         if (post.title.isNotBlank()) {
             Firebase.firestore.collection(CollectionNames.Posts.tag).add(post).addOnSuccessListener(onSuccessListener).addOnFailureListener(onFailureListener)
@@ -39,10 +39,10 @@ class FireStoreService @Inject constructor() : FireStoreInputScreenInterface {
         }
     }
 
-    fun like(
+    override fun like(
         path: String,
-        onSuccessListener: () -> Unit = {},
-        onFailureListener: (it: Exception) -> Unit = {}
+        onSuccessListener: () -> Unit,
+        onFailureListener: (it: Exception) -> Unit
     ) {
         Firebase.firestore.collection(CollectionNames.Posts.tag).document(path)
             .collection(CollectionNames.Likes.tag).document(Firebase.auth.currentUser!!.uid).set(
@@ -52,10 +52,10 @@ class FireStoreService @Inject constructor() : FireStoreInputScreenInterface {
             }.addOnFailureListener(onFailureListener)
     }
 
-    fun unLike(
+    override fun unLike(
         path: String,
-        onSuccessListener: () -> Unit = {},
-        onFailureListener: (it: Exception) -> Unit = {}
+        onSuccessListener: () -> Unit,
+        onFailureListener: (it: Exception) -> Unit
     ) {
         Firebase.firestore.collection(CollectionNames.Posts.tag).document(path)
             .collection(CollectionNames.Likes.tag).document(Firebase.auth.currentUser!!.uid)
@@ -64,7 +64,7 @@ class FireStoreService @Inject constructor() : FireStoreInputScreenInterface {
             }.addOnFailureListener(onFailureListener)
     }
 
-    fun listenLikes(
+    override fun listenLikes(
         path: String,
         snapShotListener: (snapshot: QuerySnapshot?, e: FirebaseFirestoreException?) -> Unit
     ) {
@@ -85,18 +85,44 @@ interface FireStoreInputScreenInterface {
     fun addPost(post: PostDataModel,onSuccessListener: (it:DocumentReference)->Unit={},onFailureListener: (it: Exception) -> Unit={})
 }
 
-interface FireStoreMainScreenInterface
+interface FireStoreMainScreenInterface:FireStoreLikeInterface{}
 
-interface FireStoreDetailScreenInterface
+interface FireStoreDetailScreenInterface:FireStoreLikeInterface{}
+
+interface  FireStoreLikeInterface{
+    fun like(
+        path: String,
+        onSuccessListener: () -> Unit = {},
+        onFailureListener: (it: Exception) -> Unit = {}
+    )
+    fun unLike(
+        path: String,
+        onSuccessListener: () -> Unit = {},
+        onFailureListener: (it: Exception) -> Unit = {}
+    )
+    fun listenLikes(
+        path: String,
+        snapShotListener: (snapshot: QuerySnapshot?, e: FirebaseFirestoreException?) -> Unit
+    )
+
+}
 
 
 @Module
 @InstallIn(ViewModelComponent::class)
 abstract class AnalyticsModule {
     @Binds
-    abstract fun provideFireStore(
+    abstract fun provideFireStore2Input(
         fireStoreService: FireStoreService
     ): FireStoreInputScreenInterface
+    @Binds
+    abstract fun provideFireStore2Detail(
+        fireStoreService: FireStoreService
+    ): FireStoreDetailScreenInterface
+    @Binds
+    abstract fun provideFireStore2Main(
+        fireStoreService: FireStoreService
+    ): FireStoreMainScreenInterface
 }
 
 
