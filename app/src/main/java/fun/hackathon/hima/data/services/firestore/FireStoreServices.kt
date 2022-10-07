@@ -28,15 +28,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-private val collectionReference = Firebase.firestore.collection(CollectionNames.Posts.tag)
 
 class FireStoreService @Inject constructor() : FireStoreInputScreenInterface {
-    override fun addPost(post: PostDataModel): Boolean {
+    override fun addPost(post: PostDataModel, onSuccessListener: (it:DocumentReference)->Unit, onFailureListener: (it: Exception) -> Unit){
         if (post.title.isNotBlank()) {
-            Firebase.firestore.collection(CollectionNames.Posts.tag).add(post)
-            return true
+            Firebase.firestore.collection(CollectionNames.Posts.tag).add(post).addOnSuccessListener(onSuccessListener).addOnFailureListener(onFailureListener)
         }
-        return false
+        else{
+            onFailureListener(Exception("You should write title"))
+        }
     }
 
     fun like(
@@ -82,7 +82,7 @@ class FireStoreService @Inject constructor() : FireStoreInputScreenInterface {
 }
 
 interface FireStoreInputScreenInterface {
-    fun addPost(post: PostDataModel): Boolean
+    fun addPost(post: PostDataModel,onSuccessListener: (it:DocumentReference)->Unit={},onFailureListener: (it: Exception) -> Unit={})
 }
 
 interface FireStoreMainScreenInterface

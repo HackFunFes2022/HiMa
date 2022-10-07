@@ -29,8 +29,12 @@ class InputViewModel @Inject constructor(
     val postModel = mutableStateOf(PostDataModel())
     val positionState = mutableStateOf(CameraPositionState())
 
-    fun addPost(): Boolean {
-        return fireStoreService.addPost(post = postModel.value)
+    fun addPost(): Exception? {
+        var e:Exception?=null
+        fireStoreService.addPost(post = postModel.value, onFailureListener = {
+            e=it
+        })
+        return e
     }
 
     fun updateGeoPoint(latLng: LatLng) {
