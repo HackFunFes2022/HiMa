@@ -8,7 +8,11 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.net.Uri
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -17,7 +21,10 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.compose.CameraPositionState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import timber.log.Timber
+import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 
@@ -29,7 +36,15 @@ class InputViewModel @Inject constructor(
     val postModel = mutableStateOf(PostDataModel())
     val positionState = mutableStateOf(CameraPositionState())
 
+    private var _imageState = MutableStateFlow(ImageState())
+    val imageState get() = _imageState.asStateFlow()
+
     fun addPost(): Boolean {
+        if (_imageState.value.data != null) {
+            val baos = ByteArrayOutputStream()
+            _imageState.value.data!!.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+            val data = baos.toByteArray()
+        }
         return fireStoreService.addPost(post = postModel.value)
     }
 
@@ -65,4 +80,25 @@ class InputViewModel @Inject constructor(
             Timber.d("$it")
         }
     }
+
+    fun setImage(bitmap: Bitmap) {
+        try {
+            _imageState.value = _imageState.value.copy(data = bitmap)
+        } catch (e: Exception) {
+            _imageState.value = _imageState.value.copy(error = e)
+        }
+    }
+
+    fun deleteImage() {
+        try {
+            _imageState.value = _imageState.value.copy(data = null)
+        } catch (e: Exception) {
+            _imageState.value = _imageState.value.copy(error = e)
+        }
+    }
 }
+
+data class ImageState(
+    val data: Bitmap? = null,
+    val error: Exception? = null
+)
