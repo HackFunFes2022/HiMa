@@ -114,8 +114,9 @@ fun LikeRow(modifier: Modifier = Modifier, path: String) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceAround,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+        verticalAlignment = Alignment.CenterVertically,
+
+        ) {
         Text(text = "コメントを投稿する")
         LikeButton(path = path)
     }

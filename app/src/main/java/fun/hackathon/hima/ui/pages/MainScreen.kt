@@ -4,6 +4,7 @@ import `fun`.hackathon.hima.LocalNavController
 import `fun`.hackathon.hima.R
 import `fun`.hackathon.hima.data.model.Params
 import `fun`.hackathon.hima.data.model.Posts
+import `fun`.hackathon.hima.ui.component.LikeButton
 import `fun`.hackathon.hima.ui.component.LoadingCircle
 import `fun`.hackathon.hima.ui.viewmodels.MainViewModel
 import `fun`.hackathon.hima.util.toLatLng
@@ -23,12 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,12 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.CameraPositionState
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -226,13 +217,18 @@ fun PostsPopUp(isVisible: Boolean, posts: Posts) {
                         .padding(start = 8.dp, end = 8.dp)
                 ) {
                     Spacer(modifier = Modifier.padding(4.dp))
-                    Text(
-                        text = posts.title,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.body1,
-
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = posts.title,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.body1,
+                        )
+                        Box(
+                            Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.CenterEnd
+                        ) { LikeButton(path = posts.id, color = Color.Black) }
+                    }
                     Spacer(modifier = Modifier.padding(4.dp))
                     Text(
                         text = posts.description,
