@@ -29,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
@@ -59,12 +58,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 title = {
                     Text(stringResource(id = R.string.app_name))
                 },
-                actions = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_google_icon),
-                        contentDescription = ""
-                    )
-                }
             )
         },
         floatingActionButton = {

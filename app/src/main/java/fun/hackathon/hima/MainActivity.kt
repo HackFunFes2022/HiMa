@@ -23,6 +23,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.FirebaseApp
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 val LocalNavController = staticCompositionLocalOf<NavHostController> {
     error("No Current NavController")
@@ -54,12 +55,8 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(NavItem.DetailScreen.name + "/{id}") {
                                 val id = it.arguments?.getString("id")
-                                println(id)
-                                if (id == null) {
-                                    DetailScreen(id = "null")
-                                } else {
-                                    DetailScreen(id = id)
-                                }
+                                Timber.d("$id")
+                                DetailScreen(id = id!!)
                             }
                             composable(NavItem.DetailTestScreen.name) {
                                 val id = "TvmftN51D4h3E0OSURBd"
