@@ -32,7 +32,6 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()) {
         viewModel.fetchLocation(context)
     }
     val navController = LocalNavController.current
-    val cameraPositionState = viewModel.positionState
 
     Scaffold(
         topBar = {
@@ -62,7 +61,7 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()) {
                 modifier = Modifier
                     .fillMaxWidth(0.9F)
                     .height(400.dp),
-                cameraPositionState = cameraPositionState,
+                cameraPositionState = viewModel.positionState.value,
                 onMapLongClick = {
                     if (!isChecked.value) {
                         //現在地を利用しない場合
