@@ -6,4 +6,9 @@
 
     <!-- MainScreen -->
     <string name="main_popup_detail_button">詳細を表示</string>
+
+    <!-- DetailScreen -->
+    <string name="detail_top_bar_title">詳細</string>
+    <string name="detail_comment_input_field_label">コメントを入力</string>
+    <string name="detail_comment_send_button">送信</string>
 </resources>
