@@ -8,7 +8,8 @@ data class PostDataModel(
     val title: String = "",
     val description: String = "",
     val geoPoint: GeoPoint = GeoPoint(0.0, 0.0),
-    val time: Timestamp = Timestamp.now()
+    val time: Timestamp = Timestamp.now(),
+    val imageUrl: String? = null,
 ) {
     companion object {
         fun fromMap(map: Map<String, Any?>): PostDataModel {
