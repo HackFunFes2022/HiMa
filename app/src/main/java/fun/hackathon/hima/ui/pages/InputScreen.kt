@@ -15,7 +15,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
@@ -27,10 +26,7 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()) {
     val model = viewModel.postModel
     val isChecked = rememberSaveable { mutableStateOf(true) }
     val context = LocalContext.current
-    if (viewModel.postModel.value.geoPoint == GeoPoint(0.0, 0.0)) {
-        //初期値で弾く
-        viewModel.fetchLocation(context)
-    }
+    viewModel.fetchLocation(context)
     val navController = LocalNavController.current
 
     Scaffold(
@@ -61,8 +57,9 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()) {
                 modifier = Modifier
                     .fillMaxWidth(0.9F)
                     .height(400.dp),
+
                 cameraPositionState = viewModel.positionState.value,
-                onMapLongClick = {
+                onMapClick = {
                     if (!isChecked.value) {
                         //現在地を利用しない場合
                         //ロングタップでマーカーを移動
