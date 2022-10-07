@@ -42,7 +42,7 @@ fun LikeButton(
         if (e != null) Timber.d(e)
     })
     val flag = !likes.value.isContain(Firebase.auth.currentUser!!.uid)
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
         Text(
             if (likes.value.count() > 0) {
                 "${likes.value.count()}"
