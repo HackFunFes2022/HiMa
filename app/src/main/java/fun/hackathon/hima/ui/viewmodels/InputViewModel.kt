@@ -10,10 +10,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.net.Uri
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -33,7 +30,7 @@ import javax.inject.Inject
 class InputViewModel @Inject constructor(
     private val fireStoreService: FireStoreService,
     private val fusedLocationProviderClient: FusedLocationProviderClient,
-    private val fireStorageServicesInterface: FireStorageServiceInterface
+    private val fireStorageServices: FireStorageServiceInterface
 ) : ViewModel() {
     val postModel = mutableStateOf(PostDataModel())
     val positionState = mutableStateOf(CameraPositionState())
@@ -42,15 +39,28 @@ class InputViewModel @Inject constructor(
     val imageState get() = _imageState.asStateFlow()
 
     fun addPost(): Exception? {
+        var e: Exception? = null
         if (_imageState.value.data != null) {
             val baos = ByteArrayOutputStream()
             _imageState.value.data!!.compress(Bitmap.CompressFormat.JPEG, 100, baos)
             val data = baos.toByteArray()
+            fireStorageServices.uploadImage(data, {
+                if (it.isSuccessful) {
+                    postModel.value = postModel.value.copy(imageUrl = it.result.toString())
+                    fireStoreService.addPost(post = postModel.value, onFailureListener = { exc ->
+                        e = exc
+                    })
+                    Timber.d("Posted")
+                }
+            }, {
+                e = it
+            })
+        } else {
+            fireStoreService.addPost(post = postModel.value, onFailureListener = {
+                e = it
+            })
         }
-        var e:Exception?=null
-        fireStoreService.addPost(post = postModel.value, onFailureListener = {
-            e=it
-        })
+        Timber.d(e)
         return e
     }
 

@@ -26,15 +26,22 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import timber.log.Timber
 import javax.inject.Inject
 
 
-class FireStoreService @Inject constructor() : FireStoreInputScreenInterface,FireStoreLikeInterface {
-    override fun addPost(post: PostDataModel, onSuccessListener: (it:DocumentReference)->Unit, onFailureListener: (it: Exception) -> Unit){
+class FireStoreService @Inject constructor() : FireStoreInputScreenInterface,
+    FireStoreLikeInterface, FireStoreDetailScreenInterface, FireStoreMainScreenInterface {
+    override fun addPost(
+        post: PostDataModel,
+        onSuccessListener: (it: DocumentReference) -> Unit,
+        onFailureListener: (it: Exception) -> Unit
+    ) {
+        Timber.d(post.toString())
         if (post.title.isNotBlank()) {
-            Firebase.firestore.collection(CollectionNames.Posts.tag).add(post).addOnSuccessListener(onSuccessListener).addOnFailureListener(onFailureListener)
-        }
-        else{
+            Firebase.firestore.collection(CollectionNames.Posts.tag).add(post)
+                .addOnSuccessListener(onSuccessListener).addOnFailureListener(onFailureListener)
+        } else {
             onFailureListener(Exception("You should write title"))
         }
     }
@@ -115,14 +122,6 @@ abstract class AnalyticsModule {
     abstract fun provideFireStore2Input(
         fireStoreService: FireStoreService
     ): FireStoreInputScreenInterface
-    @Binds
-    abstract fun provideFireStore2Detail(
-        fireStoreService: FireStoreService
-    ): FireStoreDetailScreenInterface
-    @Binds
-    abstract fun provideFireStore2Main(
-        fireStoreService: FireStoreService
-    ): FireStoreMainScreenInterface
 }
 
 
