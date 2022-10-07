@@ -26,11 +26,8 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()) {
     val model = viewModel.postModel
     val isChecked = rememberSaveable { mutableStateOf(true) }
     val context = LocalContext.current
-    if (viewModel.postModel.value.geoPoint == null) {
-        viewModel.fetchLocation(context)
-    }
+    viewModel.fetchLocation(context)
     val navController = LocalNavController.current
-    val cameraPositionState = viewModel.positionState
 
     Scaffold(
         topBar = {
@@ -60,8 +57,9 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()) {
                 modifier = Modifier
                     .fillMaxWidth(0.9F)
                     .height(400.dp),
-                cameraPositionState = cameraPositionState,
-                onMapLongClick = {
+
+                cameraPositionState = viewModel.positionState.value,
+                onMapClick = {
                     if (!isChecked.value) {
                         //現在地を利用しない場合
                         //ロングタップでマーカーを移動
@@ -69,16 +67,14 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()) {
                     }
                 }
             ) {
-                when {
-                    viewModel.postModel.value.geoPoint != null -> Marker(
-                        state = MarkerState(
-                            LatLng(
-                                viewModel.postModel.value.geoPoint!!.latitude,
-                                viewModel.postModel.value.geoPoint!!.longitude
-                            )
+                Marker(
+                    state = MarkerState(
+                        LatLng(
+                            viewModel.postModel.value.geoPoint.latitude,
+                            viewModel.postModel.value.geoPoint.longitude
                         )
                     )
-                }
+                )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "現在地で登録する")

@@ -17,6 +17,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.compose.CameraPositionState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -26,7 +27,7 @@ class InputViewModel @Inject constructor(
     private val fusedLocationProviderClient: FusedLocationProviderClient
 ) : ViewModel() {
     val postModel = mutableStateOf(PostDataModel())
-    val positionState = CameraPositionState()
+    val positionState = mutableStateOf(CameraPositionState())
 
     fun addPost(): Boolean {
         return fireStoreService.addPost(post = postModel.value)
@@ -55,9 +56,9 @@ class InputViewModel @Inject constructor(
         }
         fusedLocationProviderClient.lastLocation.addOnSuccessListener {
             updateGeoPoint(it.toLatLng())
-            positionState.position =
-                CameraPosition.fromLatLngZoom(it.toLatLng(), 18f)
-            println(it)
+            positionState.value =
+                CameraPositionState(CameraPosition.fromLatLngZoom(it.toLatLng(), 18f))
+            Timber.d("$it")
         }.addOnFailureListener {
             println(it)
         }.addOnCompleteListener {
