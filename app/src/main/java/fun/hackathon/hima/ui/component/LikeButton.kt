@@ -1,6 +1,7 @@
 package `fun`.hackathon.hima.ui.component
 
 import `fun`.hackathon.hima.data.model.LikesDataModel
+import `fun`.hackathon.hima.data.services.FireStoreLikeInterface
 import `fun`.hackathon.hima.data.services.FireStoreService
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Icon
@@ -21,7 +22,7 @@ import timber.log.Timber
 @Composable
 fun LikeButton(
     modifier: Modifier = Modifier,
-    fireStoreService: FireStoreService = FireStoreService(),
+    fireStoreService: FireStoreLikeInterface = FireStoreService(),
     path: String,
     color: Color = Color.White
 ) {

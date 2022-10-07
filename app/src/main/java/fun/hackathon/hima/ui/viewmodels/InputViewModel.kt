@@ -41,13 +41,17 @@ class InputViewModel @Inject constructor(
     private var _imageState = MutableStateFlow(ImageState())
     val imageState get() = _imageState.asStateFlow()
 
-    fun addPost(): Boolean {
+    fun addPost(): Exception? {
         if (_imageState.value.data != null) {
             val baos = ByteArrayOutputStream()
             _imageState.value.data!!.compress(Bitmap.CompressFormat.JPEG, 100, baos)
             val data = baos.toByteArray()
         }
-        return fireStoreService.addPost(post = postModel.value)
+        var e:Exception?=null
+        fireStoreService.addPost(post = postModel.value, onFailureListener = {
+            e=it
+        })
+        return e
     }
 
     fun updateGeoPoint(latLng: LatLng) {

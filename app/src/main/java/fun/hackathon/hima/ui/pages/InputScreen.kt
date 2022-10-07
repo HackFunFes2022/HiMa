@@ -114,10 +114,10 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()) {
                     launcher.launch()
                 }
                 OutlinedButton(onClick = {
-                    val flag = viewModel.addPost()
-                    if (flag) {
-                        //とりあえず仮置き
-                        navController.navigate(NavItem.MainScreen.name)
+                    val exception = viewModel.addPost()
+                if (exception==null) {
+                    //とりあえず仮置き
+                    navController.navigate(NavItem.MainScreen.name)
                     }
                 }) {
                     Text(text = "Ok")
