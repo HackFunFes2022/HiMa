@@ -11,4 +11,8 @@
     <string name="detail_top_bar_title">詳細</string>
     <string name="detail_comment_input_field_label">コメントを入力</string>
     <string name="detail_comment_send_button">送信</string>
+
+    <!-- InputScreen -->
+    <string name="input_take_picture_button">画像を撮る</string>
+    <string name="input_take_picture_retry_button">もう一度撮る</string>
 </resources>
