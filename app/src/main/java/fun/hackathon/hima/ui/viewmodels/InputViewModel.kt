@@ -3,6 +3,7 @@ package `fun`.hackathon.hima.ui.viewmodels
 import `fun`.hackathon.hima.data.model.Params
 import `fun`.hackathon.hima.data.model.PostDataModel
 import `fun`.hackathon.hima.data.services.FireStoreService
+import `fun`.hackathon.hima.data.services.firestorage.FireStorageServiceInterface
 import `fun`.hackathon.hima.util.toLatLng
 import android.Manifest
 import android.app.Activity
@@ -24,7 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class InputViewModel @Inject constructor(
     private val fireStoreService: FireStoreService,
-    private val fusedLocationProviderClient: FusedLocationProviderClient
+    private val fusedLocationProviderClient: FusedLocationProviderClient,
+    private val fireStorageServicesInterface: FireStorageServiceInterface
 ) : ViewModel() {
     val postModel = mutableStateOf(PostDataModel())
     val positionState = mutableStateOf(CameraPositionState())
