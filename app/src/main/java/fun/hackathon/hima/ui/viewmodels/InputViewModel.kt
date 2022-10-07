@@ -60,9 +60,9 @@ class InputViewModel @Inject constructor(
                 CameraPositionState(CameraPosition.fromLatLngZoom(it.toLatLng(), 18f))
             Timber.d("$it")
         }.addOnFailureListener {
-            println(it)
+            Timber.d("$it")
         }.addOnCompleteListener {
-            println(it)
+            Timber.d("$it")
         }
     }
 }

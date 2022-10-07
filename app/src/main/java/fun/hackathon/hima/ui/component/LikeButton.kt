@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import timber.log.Timber
 
 @Composable
 fun LikeButton(
@@ -38,7 +39,7 @@ fun LikeButton(
             }
             likes.value = LikesDataModel(list)
         }
-        if (e != null) println(e)
+        if (e != null) Timber.d(e)
     })
     val flag = !likes.value.isContain(Firebase.auth.currentUser!!.uid)
     Row(verticalAlignment = Alignment.CenterVertically) {
