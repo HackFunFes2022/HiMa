@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
@@ -26,7 +27,8 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()) {
     val model = viewModel.postModel
     val isChecked = rememberSaveable { mutableStateOf(true) }
     val context = LocalContext.current
-    if (viewModel.postModel.value.geoPoint == null) {
+    if (viewModel.postModel.value.geoPoint == GeoPoint(0.0, 0.0)) {
+        //初期値で弾く
         viewModel.fetchLocation(context)
     }
     val navController = LocalNavController.current
@@ -69,16 +71,14 @@ fun InputScreen(viewModel: InputViewModel = hiltViewModel()) {
                     }
                 }
             ) {
-                when {
-                    viewModel.postModel.value.geoPoint != null -> Marker(
-                        state = MarkerState(
-                            LatLng(
-                                viewModel.postModel.value.geoPoint!!.latitude,
-                                viewModel.postModel.value.geoPoint!!.longitude
-                            )
+                Marker(
+                    state = MarkerState(
+                        LatLng(
+                            viewModel.postModel.value.geoPoint.latitude,
+                            viewModel.postModel.value.geoPoint.longitude
                         )
                     )
-                }
+                )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "現在地で登録する")
