@@ -90,4 +90,7 @@ dependencies {
 
     // Timber
     implementation 'com.jakewharton.timber:timber:5.0.1'
+
+    // coil-compose
+    implementation("io.coil-kt:coil-compose:2.2.2")
 }

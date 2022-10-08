@@ -17,7 +17,8 @@ data class PostDataModel(
                 title = map["title"] as String,
                 description = map["description"] as String,
                 geoPoint = (map["geoPoint"] ?: GeoPoint(0.0, 0.0)) as GeoPoint,
-                time = map["time"] as Timestamp
+                time = map["time"] as Timestamp,
+                imageUrl = map["imageUrl"] as String?
             )
         }
     }
@@ -28,6 +29,7 @@ data class PostDataModel(
             "description" to description,
             "time" to time,
             "geoPoint" to geoPoint,
+            "imageUrl" to imageUrl
         )
     }
 }
