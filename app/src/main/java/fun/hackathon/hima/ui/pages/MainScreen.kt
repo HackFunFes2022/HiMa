@@ -27,15 +27,18 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -176,7 +179,10 @@ fun MainContent(
 @Composable
 fun PostsPopUp(isVisible: Boolean, posts: Posts) {
     val navController = LocalNavController.current
-    val popupHeight = 220.dp
+    val normalPopupHeight = 220.dp
+    val popupHeight = remember {
+        mutableStateOf(normalPopupHeight)
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -185,7 +191,7 @@ fun PostsPopUp(isVisible: Boolean, posts: Posts) {
         AnimatedVisibility(
             visible = isVisible,
             enter = slideIn(tween(100, easing = LinearOutSlowInEasing)) { fullSize ->
-                IntOffset(0, fullSize.height - popupHeight.value.toInt())
+                IntOffset(0, fullSize.height - popupHeight.value.value.toInt())
             },
             exit = slideOut(tween(100, easing = FastOutSlowInEasing)) { fullSize ->
                 IntOffset(0, fullSize.height)
@@ -193,7 +199,7 @@ fun PostsPopUp(isVisible: Boolean, posts: Posts) {
         ) {
             Box(
                 modifier = Modifier
-                    .height(popupHeight)
+                    .height(popupHeight.value)
                     .fillMaxWidth(0.8f)
             ) {
                 Column(
@@ -209,13 +215,32 @@ fun PostsPopUp(isVisible: Boolean, posts: Posts) {
                         )
                         .padding(start = 8.dp, end = 8.dp)
                 ) {
-                    Spacer(modifier = Modifier.padding(4.dp))
+                    if (posts.imageUrl.isNotEmpty()) {
+                        val imageTopSpace = 4.dp
+                        val imageHeight = 100.dp
+                        popupHeight.value = imageHeight + normalPopupHeight + imageTopSpace
+
+                        Spacer(modifier = Modifier.padding(imageTopSpace))
+                        AsyncImage(
+                            model = posts.imageUrl,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(imageHeight)
+                                .clip(RoundedCornerShape(10.dp))
+                        )
+                    } else {
+                        popupHeight.value = normalPopupHeight
+                    }
+                    Spacer(modifier = Modifier.padding(2.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = posts.title,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.body1,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                         Box(
                             Modifier.fillMaxWidth(),
@@ -226,7 +251,9 @@ fun PostsPopUp(isVisible: Boolean, posts: Posts) {
                     Text(
                         text = posts.description,
                         color = Color.Black,
-                        style = MaterialTheme.typography.body2
+                        style = MaterialTheme.typography.body2,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.padding(4.dp))
                     Row(

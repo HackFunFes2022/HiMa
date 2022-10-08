@@ -9,6 +9,8 @@ import `fun`.hackathon.hima.ui.component.LikeButton
 import `fun`.hackathon.hima.ui.component.ListSpacer
 import `fun`.hackathon.hima.ui.component.LoadingCircle
 import `fun`.hackathon.hima.ui.viewmodels.DetailViewModel
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,10 +25,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 
 @Composable
 fun DetailScreen(id: String, viewModel: DetailViewModel = hiltViewModel()) {
@@ -83,6 +87,13 @@ fun DetailContent(
     Column(
         Modifier.fillMaxSize()
     ) {
+        if (!posts.imageUrl.isNullOrEmpty()) {
+            AsyncImage(
+                model = posts.imageUrl,
+                contentDescription = null,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = posts.title,
@@ -96,7 +107,7 @@ fun DetailContent(
             modifier = Modifier.padding(start = 16.dp, end = 16.dp),
             style = MaterialTheme.typography.body1
         )
-        CommentRow(likePath = id)
+        CommentRow(likePath = id, commentSize = comments.size)
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -122,11 +133,12 @@ fun CommentLine(onSubmit: (comment: String) -> Unit) {
     val commentTextFieldState = remember { mutableStateOf("") }
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colors.onPrimary),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         OutlinedTextField(
-            modifier = Modifier.weight(8f),
+            modifier = Modifier
+                .weight(8f),
             value = commentTextFieldState.value,
             onValueChange = { commentTextFieldState.value = it },
             label = {
@@ -147,18 +159,31 @@ fun CommentLine(onSubmit: (comment: String) -> Unit) {
 }
 
 @Composable
-fun CommentRow(modifier: Modifier = Modifier, likePath: String) {
+fun CommentRow(
+    modifier: Modifier = Modifier,
+    likePath: String,
+    commentSize: Int = 0
+) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = "コメント",
-            modifier = Modifier.padding(start = 8.dp),
-            style = MaterialTheme.typography.h5,
-            fontWeight = FontWeight.Bold
-        )
+        if (commentSize == 0) {
+            Text(
+                text = stringResource(id = R.string.detail_comment_list_title_no_comment),
+                modifier = Modifier.padding(start = 8.dp),
+                style = MaterialTheme.typography.h5,
+                fontWeight = FontWeight.Bold
+            )
+        } else {
+            Text(
+                text = stringResource(id = R.string.detail_comment_list_title, commentSize),
+                modifier = Modifier.padding(start = 8.dp),
+                style = MaterialTheme.typography.h5,
+                fontWeight = FontWeight.Bold
+            )
+        }
         LikeButton(path = likePath)
     }
 }
